@@ -4,7 +4,7 @@ import os
 import datetime
 import requests
 
-RTSP_URL = "rtsp://admin:dasung35$$@192.168.0.64:554/Streaming/Channels/101"
+RTSP_URL = "rtsp://admin:dasung35$$@192.168.0.64/Streaming/Channels/101"
 SAVE_PATH = "captured_images"
 CAPTURE_INTERVAL_SECONDS = 29
 FILENAME_PREFIX = "cam01_"
