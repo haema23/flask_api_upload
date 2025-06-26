@@ -25,5 +25,10 @@ def upload():
     print(f"✅ 이미지 수신 및 저장: {save_path}")
     return "ok", 200
 
+@app.route("/files", methods=["GET"])
+def list_files():
+    files = os.listdir(UPLOAD_FOLDER)
+    return "<br>".join(files)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
