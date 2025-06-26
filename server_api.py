@@ -18,12 +18,13 @@ def upload():
         return "❌ 이미지 파일이 없습니다.", 400
 
     image = request.files['image']
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{timestamp}_{image.filename}"
+    timestamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+    filename = f"{timestamp}.jpg"  # 간단한 파일명
     save_path = os.path.join(UPLOAD_FOLDER, filename)
     image.save(save_path)
     print(f"✅ 이미지 수신 및 저장: {save_path}")
     return "ok", 200
+
 
 @app.route("/files", methods=["GET"])
 def list_files():
