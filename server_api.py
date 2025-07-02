@@ -31,5 +31,11 @@ def list_files():
     files = os.listdir(UPLOAD_FOLDER)
     return "<br>".join(files)
 
+@app.route("/upload_sensor", methods=["POST"])
+def upload_sensor():
+    data = request.get_json()
+    print(f" 센서 데이터 수신 : {data}")
+    return "ok", 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
