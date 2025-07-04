@@ -13,11 +13,15 @@ RTSP_URL = "rtsp://admin:dasung35$$@192.168.0.64/Streaming/Channels/101"
 SAVE_PATH = "captured_images"
 CAPTURE_INTERVAL_SECONDS = 29
 
-SERIAL_PORT = '/dev/ttyUSB0'
+SERIAL_PORT = 'COM11'
 SERIAL_BAUDRATE = 9600
 
+# Render 서버 엔드포인트
 API_IMAGE_UPLOAD = "https://flask-api-upload.onrender.com/upload"
-API_SENSOR_UPLOAD = "https://flask-api-upload.onrender.com/upload_sensor"
+API_PH = "https://flask-api-upload.onrender.com/upload_ph"
+API_TEMP = "https://flask-api-upload.onrender.com/upload_temp"
+API_HUM = "https://flask-api-upload.onrender.com/upload_hum"
+API_CO2 = "https://flask-api-upload.onrender.com/upload_co2"
 
 # ================================
 # 함수
@@ -38,15 +42,33 @@ def upload_image(filepath):
     except Exception as e:
         print(f"❌ 이미지 업로드 오류: {e}")
 
-def upload_sensor_data(sensor_dict):
+def upload_ph(ph):
     try:
-        response = requests.post(API_SENSOR_UPLOAD, json=sensor_dict)
-        if response.status_code == 200:
-            print(f"✅ 센서 업로드 성공: {sensor_dict}")
-        else:
-            print(f"❌ 센서 업로드 실패: {response.status_code}")
+        response = requests.post(API_PH, json={"ph": ph})
+        print(f"✅ pH 업로드: {ph}, 응답: {response.status_code}")
     except Exception as e:
-        print(f"❌ 센서 업로드 오류: {e}")
+        print(f"❌ pH 업로드 오류: {e}")
+
+def upload_temp(temp):
+    try:
+        response = requests.post(API_TEMP, json={"temp": temp})
+        print(f"✅ 온도 업로드: {temp}, 응답: {response.status_code}")
+    except Exception as e:
+        print(f"❌ 온도 업로드 오류: {e}")
+
+def upload_hum(hum):
+    try:
+        response = requests.post(API_HUM, json={"humidity": hum})
+        print(f"✅ 습도 업로드: {hum}, 응답: {response.status_code}")
+    except Exception as e:
+        print(f"❌ 습도 업로드 오류: {e}")
+
+def upload_co2(co2):
+    try:
+        response = requests.post(API_CO2, json={"co2": co2})
+        print(f"✅ CO2 업로드: {co2}, 응답: {response.status_code}")
+    except Exception as e:
+        print(f"❌ CO2 업로드 오류: {e}")
 
 # ================================
 # 카메라 루프
@@ -97,9 +119,11 @@ def sensor_loop():
             line = ser.readline().decode('utf-8').strip()
             if line:
                 try:
-                    temp, ph, hum = map(float, line.split(","))
-                    payload = {"temp": temp, "ph": ph, "humidity": hum}
-                    upload_sensor_data(payload)
+                    ph, temp, hum, co2 = map(float, line.split(","))
+                    upload_ph(ph)
+                    upload_temp(temp)
+                    upload_hum(hum)
+                    upload_co2(co2)
                 except Exception as e:
                     print(f"[센서] 데이터 파싱 실패: '{line}' → {e}")
     except Exception as e:
@@ -110,7 +134,7 @@ def sensor_loop():
 # ================================
 if __name__ == "__main__":
     threading.Thread(target=camera_loop, daemon=True).start()
-    #threading.Thread(target=sensor_loop, daemon=True).start()
+    threading.Thread(target=sensor_loop, daemon=True).start()
 
     # 메인 쓰레드를 유지
     while True:
