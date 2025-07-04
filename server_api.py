@@ -10,31 +10,58 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 @app.route("/", methods=["GET"])
 def index():
-    return "✅ 이미지 수신 API 작동 중"
+    return "✅ 이미지 & 센서 수신 API 작동 중"
 
+# ----------------------------
+# 이미지 업로드
+# ----------------------------
 @app.route("/upload", methods=["POST"])
-def upload():
+def upload_image():
     if 'image' not in request.files:
         return "❌ 이미지 파일이 없습니다.", 400
 
     image = request.files['image']
-    timestamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-    filename = f"{timestamp}.jpg"  # 간단한 파일명
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{timestamp}_{image.filename}"
     save_path = os.path.join(UPLOAD_FOLDER, filename)
     image.save(save_path)
     print(f"✅ 이미지 수신 및 저장: {save_path}")
     return "ok", 200
 
+# ----------------------------
+# pH
+# ----------------------------
+@app.route("/upload_ph", methods=["POST"])
+def upload_ph():
+    data = request.json
+    print(f"✅ pH 데이터 수신: {data}")
+    return "ok", 200
 
-@app.route("/files", methods=["GET"])
-def list_files():
-    files = os.listdir(UPLOAD_FOLDER)
-    return "<br>".join(files)
+# ----------------------------
+# 온도
+# ----------------------------
+@app.route("/upload_temp", methods=["POST"])
+def upload_temp():
+    data = request.json
+    print(f"✅ 온도 데이터 수신: {data}")
+    return "ok", 200
 
-@app.route("/upload_sensor", methods=["POST"])
-def upload_sensor():
-    data = request.get_json()
-    print(f" 센서 데이터 수신 : {data}")
+# ----------------------------
+# 습도
+# ----------------------------
+@app.route("/upload_hum", methods=["POST"])
+def upload_hum():
+    data = request.json
+    print(f"✅ 습도 데이터 수신: {data}")
+    return "ok", 200
+
+# ----------------------------
+# CO2
+# ----------------------------
+@app.route("/upload_co2", methods=["POST"])
+def upload_co2():
+    data = request.json
+    print(f"✅ CO2 데이터 수신: {data}")
     return "ok", 200
 
 if __name__ == "__main__":
