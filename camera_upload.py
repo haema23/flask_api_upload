@@ -13,7 +13,7 @@ RTSP_URL = "rtsp://admin:dasung35$$@192.168.0.64/Streaming/Channels/101"
 SAVE_PATH = "captured_images"
 CAPTURE_INTERVAL_SECONDS = 29
 
-SERIAL_PORT = 'COM11'
+SERIAL_PORT = 'COM11'  # Windows면 'COM4' 이런 식
 SERIAL_BAUDRATE = 9600
 
 # Render 서버 엔드포인트
@@ -109,11 +109,12 @@ def camera_loop():
         cv2.waitKey(1)
 
 # ================================
-# 센서 루프
+# 센서 루프 (버퍼 초기화 포함)
 # ================================
 def sensor_loop():
     try:
         ser = serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1)
+        ser.reset_input_buffer()  # 💥 시리얼 버퍼 클리어
         print(f"[센서] 시리얼 연결됨: {SERIAL_PORT}")
         while True:
             line = ser.readline().decode('utf-8').strip()
