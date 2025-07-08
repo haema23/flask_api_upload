@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cv2
 import time
 import os
@@ -7,24 +8,22 @@ import serial
 import threading
 
 # ================================
-# 설정값
-# ================================
+# ?�정�?# ================================
 RTSP_URL = "rtsp://admin:dasung35$$@192.168.0.64/Streaming/Channels/101"
 SAVE_PATH = "captured_images"
 CAPTURE_INTERVAL_SECONDS = 29
 
-SERIAL_PORT = 'COM11'  # Windows면 'COM4' 이런 식
+SERIAL_PORT = '/dev/ttyACM0'  # Windows�?'COM4' ?�런 
 SERIAL_BAUDRATE = 9600
 
-# Render 서버 엔드포인트
-API_IMAGE_UPLOAD = "https://flask-api-upload.onrender.com/upload"
+# Render ?�버 ?�드?�인??API_IMAGE_UPLOAD = "https://flask-api-upload.onrender.com/upload"
 API_PH = "https://flask-api-upload.onrender.com/upload_ph"
 API_TEMP = "https://flask-api-upload.onrender.com/upload_temp"
 API_HUM = "https://flask-api-upload.onrender.com/upload_hum"
 API_CO2 = "https://flask-api-upload.onrender.com/upload_co2"
 
 # ================================
-# 함수
+# ?�수
 # ================================
 def ensure_dir(directory):
     if not os.path.exists(directory):
@@ -36,48 +35,48 @@ def upload_image(filepath):
             files = {'image': f}
             response = requests.post(API_IMAGE_UPLOAD, files=files)
             if response.status_code == 200:
-                print(f"✅ 이미지 업로드 성공: {os.path.basename(filepath)}")
+                print(f"???��?지 ?�로???�공: {os.path.basename(filepath)}")
             else:
-                print(f"❌ 이미지 업로드 실패: {response.status_code}")
+                print(f"???��?지 ?�로???�패: {response.status_code}")
     except Exception as e:
-        print(f"❌ 이미지 업로드 오류: {e}")
+        print(f"???��?지 ?�로???�류: {e}")
 
 def upload_ph(ph):
     try:
         response = requests.post(API_PH, json={"ph": ph})
-        print(f"✅ pH 업로드: {ph}, 응답: {response.status_code}")
+        print(f"??pH ?�로?? {ph}, ?�답: {response.status_code}")
     except Exception as e:
-        print(f"❌ pH 업로드 오류: {e}")
+        print(f"??pH ?�로???�류: {e}")
 
 def upload_temp(temp):
     try:
         response = requests.post(API_TEMP, json={"temp": temp})
-        print(f"✅ 온도 업로드: {temp}, 응답: {response.status_code}")
+        print(f"???�도 ?�로?? {temp}, ?�답: {response.status_code}")
     except Exception as e:
-        print(f"❌ 온도 업로드 오류: {e}")
+        print(f"???�도 ?�로???�류: {e}")
 
 def upload_hum(hum):
     try:
         response = requests.post(API_HUM, json={"humidity": hum})
-        print(f"✅ 습도 업로드: {hum}, 응답: {response.status_code}")
+        print(f"???�도 ?�로?? {hum}, ?�답: {response.status_code}")
     except Exception as e:
-        print(f"❌ 습도 업로드 오류: {e}")
+        print(f"???�도 ?�로???�류: {e}")
 
 def upload_co2(co2):
     try:
         response = requests.post(API_CO2, json={"co2": co2})
-        print(f"✅ CO2 업로드: {co2}, 응답: {response.status_code}")
+        print(f"??CO2 ?�로?? {co2}, ?�답: {response.status_code}")
     except Exception as e:
-        print(f"❌ CO2 업로드 오류: {e}")
+        print(f"??CO2 ?�로???�류: {e}")
 
 # ================================
-# 카메라 루프
+# 카메??루프
 # ================================
 def camera_loop():
     ensure_dir(SAVE_PATH)
     cap = cv2.VideoCapture(RTSP_URL)
     if not cap.isOpened():
-        print(f"❌ 카메라 연결 실패: {RTSP_URL}")
+        print(f"??카메???�결 ?�패: {RTSP_URL}")
         return
 
     last_capture_time = time.time()
@@ -87,7 +86,7 @@ def camera_loop():
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("⚠️ 카메라 프레임 실패")
+            print("?�️ 카메???�레???�패")
             time.sleep(5)
             continue
 
@@ -102,20 +101,19 @@ def camera_loop():
 
             filename = os.path.join(SAVE_PATH, f"{current_minute_marker}_{frame_count:04d}.jpg")
             cv2.imwrite(filename, frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
-            print(f"📸 이미지 저장: {filename}")
+            print(f"?�� ?��?지 ?�?? {filename}")
             upload_image(filename)
             last_capture_time = current_time
 
         cv2.waitKey(1)
 
 # ================================
-# 센서 루프 (버퍼 초기화 포함)
+# ?�서 루프 (버퍼 초기???�함)
 # ================================
 def sensor_loop():
     try:
         ser = serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1)
-        ser.reset_input_buffer()  # 💥 시리얼 버퍼 클리어
-        print(f"[센서] 시리얼 연결됨: {SERIAL_PORT}")
+        ser.reset_input_buffer()  # ?�� ?�리??버퍼 ?�리??        print(f"[?�서] ?�리???�결?? {SERIAL_PORT}")
         while True:
             line = ser.readline().decode('utf-8').strip()
             if line:
@@ -126,9 +124,9 @@ def sensor_loop():
                     upload_hum(hum)
                     upload_co2(co2)
                 except Exception as e:
-                    print(f"[센서] 데이터 파싱 실패: '{line}' → {e}")
+                    print(f"[?�서] ?�이???�싱 ?�패: '{line}' ??{e}")
     except Exception as e:
-        print(f"[센서] 시리얼 연결 실패: {e}")
+        print(f"[?�서] ?�리???�결 ?�패: {e}")
 
 # ================================
 # 메인
@@ -137,6 +135,6 @@ if __name__ == "__main__":
     threading.Thread(target=camera_loop, daemon=True).start()
     threading.Thread(target=sensor_loop, daemon=True).start()
 
-    # 메인 쓰레드를 유지
+    # 메인 ?�레?��? ?��?
     while True:
         time.sleep(1)
